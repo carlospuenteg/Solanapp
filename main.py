@@ -13,7 +13,7 @@ def createWallet():
     wallets = os.listdir('Wallets')
     print("wallets")
     keyNum = 1
-    if wallets and wallets[0] != ".gitkeep": 
+    if wallets and "".join(walletsDirs) != ".gitkeep": 
         keyNum = max(sorted([int(keypair[6:]) for keypair in wallets]))+1
 
     # Create a key
@@ -40,7 +40,7 @@ def createWallet():
 
 ########## CREATE WALLET IF NEEDED ##########
 walletsDirs = os.listdir('Wallets')
-if not walletsDirs or walletsDirs[0] == ".gitkeep" : createWallet()
+if not walletsDirs or "".join(walletsDirs) == ".gitkeep" : createWallet()
 
 
 
