@@ -11,8 +11,9 @@ if os.system("solana --version") != 0:
 def createWallet():
     # Get last wallet number
     wallets = os.listdir('Wallets')
+    print("wallets")
     keyNum = 1
-    if wallets: 
+    if wallets and wallets[0] != ".gitkeep": 
         keyNum = max(sorted([int(keypair[6:]) for keypair in wallets]))+1
 
     # Create a key
@@ -38,7 +39,8 @@ def createWallet():
 
 
 ########## CREATE WALLET IF NEEDED ##########
-if not os.listdir('Wallets'): createWallet()
+walletsDirs = os.listdir('Wallets')
+if not walletsDirs or walletsDirs[0] == ".gitkeep" : createWallet()
 
 
 
@@ -113,7 +115,7 @@ def airdrop():
                 for x in range(int(float(qty)//2)):
                     os.system("solana airdrop 2 " + selPubKey + " --url https://api.devnet.solana.com")
                 if (float(qty)%2):
-                    os.system("solana airdrop " + str(qty%2) + " " + selPubKey + " --url https://api.devnet.solana.com")
+                    os.system("solana airdrop " + str(float(qty)%2) + " " + selPubKey + " --url https://api.devnet.solana.com")
                 break    
     else:
         print("\nYou can't use airdrop in the mainnet")
