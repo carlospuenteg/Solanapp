@@ -110,7 +110,7 @@ def airdrop():
                 os.system("solana airdrop " + qty + " " + selPubKey + " --url https://api.devnet.solana.com")
                 break
             else:
-                for x in range(float(qty)//2):
+                for x in range(int(float(qty)//2)):
                     os.system("solana airdrop 2 " + selPubKey + " --url https://api.devnet.solana.com")
                 if (float(qty)%2):
                     os.system("solana airdrop " + str(qty%2) + " " + selPubKey + " --url https://api.devnet.solana.com")
