@@ -105,12 +105,16 @@ def getBalance():
 def airdrop():
     if selCluster == "devnet":
         while True:
-            qty = input("Quantity (up to 2): ")
+            qty = input("Quantity: ")
             if float(qty) <= 2:
                 os.system("solana airdrop " + qty + " " + selPubKey + " --url https://api.devnet.solana.com")
                 break
             else:
-                print("- Invalid quantity")
+                for x in range(float(qty)//2):
+                    os.system("solana airdrop 2 " + selPubKey + " --url https://api.devnet.solana.com")
+                if (float(qty)%2):
+                    os.system("solana airdrop " + str(qty%2) + " " + selPubKey + " --url https://api.devnet.solana.com")
+                break    
     else:
         print("\nYou can't use airdrop in the mainnet")
 
