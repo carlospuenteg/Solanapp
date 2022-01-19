@@ -104,42 +104,66 @@ def createToken():
 
 
 
-########## CREATE AN ACCOUNT ##########
+########## CREATE AN NFT ########## https://spl.solana.com/token#example-create-a-non-fungible-token
+def createNFT():
+    tokenID = os.popen("spl-token create-token --decimals 0").read().split("\n")[0].split(" ")[2]
+    account = os.popen("spl-token create-account " + tokenID).read().split("\n")[0].split(" ")[2]
+    os.system("spl-token mint " + tokenID + " 1 " + account)
+    os.system("spl-token authorize " + tokenID + " mint --disable")
+    os.system("spl-token account-info " + tokenID)
+
+    if os.popen("solana balance " + account).read().split() != "0 SOL".split():
+        NFTname = input("Name of the NFT: ")
+
+        if "NFTs.json" not in os.listdir(os.getcwd()):
+            with open('NFTs.json', 'w') as json_file:
+                json.dump({}, json_file, indent=4)
+
+        NFTs = json.load(open('NFTs.json'))
+        NFTs[NFTname] = {"tokenID": tokenID, "account": account, "owner": selWallet}
+
+        with open("NFTs.json", 'w') as json_file:
+            json.dump(NFTs, json_file, indent=4)
+    else:
+        print("\nUnable to create the token, insufficient balance")
+
+
+
+########## CREATE AN ACCOUNT FOR A TOKEN ##########
 def createAccount():    
-    tokens = json.load(open('tokens.json'))
-    tokenName = input("Token name: ")
-    tokenID = tokens[tokenName]
+    tokenID = getTokenID()
     os.system("spl-token create-account " + tokenID)
 
 
 
 ########## MINT TOKENS ##########
 def mintTokens():
-    tokens = json.load(open('tokens.json'))
-    tokenName = input("Token name: ")
-    tokenID = tokens[tokenName]
+    tokenID = getTokenID()
     qty = input("Quantity of tokens to be minted: ")
     os.system("spl-token mint " + tokenID + " " + qty)
 
 
 
-########## DISABLE MINT ##########
+########## DISABLE MINTING OF A TOKEN ##########
 def disableMint():
-    tokens = json.load(open('tokens.json'))
-    tokenName = input("Token name: ")
-    tokenID = tokens[tokenName]
+    tokenID = getTokenID()
     os.system("spl-token authorize " + tokenID + " mint --disable")
 
 
 
 ########## TRANSFER TOKEN ##########
 def tokenTransfer():
-    tokens = json.load(open('tokens.json'))
-    tokenName = input("Token name: ")
-    tokenID = tokens[tokenName]
+    tokenID = getTokenID()
     qty = input("Quantity: ")
     receiver = input("Public key of the receiver: ")
     os.system("spl-token transfer --fund-recipient " + tokenID + " " + qty + " " + receiver + " --allow-unfunded-recipient")
+
+
+
+########## GET YOUR ACCOUNT BALANCE ##########
+def viewAccounts():
+    print("\n")
+    os.system("spl-token accounts")
 
 
 
@@ -171,6 +195,18 @@ def airdrop():
 
 
 
+########## GET TOKEN ID ##########
+def getTokenID():
+    if input("Search token by its name (n) or by its ID (i)?: ").lower() == "n":
+        tokens = json.load(open('tokens.json'))
+        tokenName = input("Token name: ")
+        tokenID = tokens[tokenName]
+    else:
+        tokenID = input("Token ID: ")
+    return tokenID
+
+
+
 ########## MENU ##########
 def menu():
     print("\nChoose an option: ")
@@ -184,6 +220,8 @@ def menu():
     print("7. Mint tokens")
     print("8. Disable minting of token")
     print("9. Transfer tokens")
+    print("10. View all your token accounts")
+    print("11. Create an NFT")
 
     while True:
         op = input("\nOption: ")
@@ -196,7 +234,10 @@ def menu():
         elif op == "7": mintTokens()
         elif op == "8": disableMint()
         elif op == "9": tokenTransfer()
+        elif op == "10": viewAccounts()
+        elif op == "11": createNFT()
 
+        # https://spl.solana.com/token#example-wrapping-sol-in-a-token
 
 
 ########## CALL THE MAIN FUNCTION ##########

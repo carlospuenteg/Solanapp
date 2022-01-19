@@ -1,5 +1,4 @@
 {
     "cluster": "devnet",
-    "balance": "SOL",
-    "wallet": "abc"
+    "balance": "SOL"
 }
