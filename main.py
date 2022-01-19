@@ -10,15 +10,19 @@ if os.system("solana --version") != 0:
 ########## CREATE A WALLET ##########
 def createWallet():
     config = json.load(open('config.json'))
-    wallName = input("Main wallet's name: ")
+    while True:
+        wallName = input("Wallet's name: ")
+        if "Wallets" not in os.listdir(os.getcwd()) or wallName not in os.listdir("Wallets"):
+            break
+        else:
+            print("That name already exists!")
 
-    print(os.getcwd())
     if "Wallets" not in os.listdir(os.getcwd()):
         os.mkdir("Wallets")
         config['wallet'] = wallName 
         with open("config.json", 'w') as json_file:
             json.dump(config, json_file, indent=4)
-    elif input("Do you want to select this wallet as your main wallet? (Y/n): ").lower == "y":
+    elif input("Do you want to select this wallet as your main wallet? (Y/n): ").lower() == "y":
         config['wallet'] = wallName 
         with open("config.json", 'w') as json_file:
             json.dump(config, json_file, indent=4)
