@@ -7,21 +7,13 @@ if os.system("solana --version") != 0:
 
 
 
-########## CREATE A WALLET ########## os.popen("spl-token create-token --decimals " + dec).read().split("\n")[0].split(" ")[2]
+########## CREATE A WALLET ##########
 def createWallet():
-    # Get last wallet number
     wallets = os.listdir('Wallets')
-    print("wallets")
-    keyNum = 1
-    if wallets and "".join(walletsDirs) != ".gitkeep": 
-        keyNum = max(sorted([int(keypair[6:]) for keypair in wallets]))+1
 
-    # Create a key
-    dir = "Wallets/Wallet" + str(keyNum)
+    dir = input("Wallet name: ")
     os.mkdir(dir)
     output = os.popen("solana-keygen new --no-passphrase -o " + dir + "/key.json").read().split("\n")
-
-    # Save the seedPhrase and pubKey as a json file
     pubKey = output[3].split(" ")[1]
     seedPhrase = output[6]
     seed = { 
@@ -31,21 +23,19 @@ def createWallet():
     with open(dir+"/seed.json", 'w') as json_file:
         json.dump(seed, json_file, indent=4)
 
-    # Create a token folder
-    os.mkdir(dir + "/Tokens")
-
     print("\nWallet successfully created!")
 
 
 
 ########## CREATE WALLET IF NEEDED ##########
-walletsDirs = os.listdir('Wallets')
-if not walletsDirs or "".join(walletsDirs) == ".gitkeep" : createWallet()
+if "Wallets" not in os.getcwd(): 
+    os.mkdir("Wallets")
+    createWallet()
 
 
 
 ########## GET THE SETTINGS ##########
-config = json.load(open('Config/config.json'))
+config = json.load(open('config.json'))
 selWallet = config['wallet']
 selCluster = config['cluster']
 selBalance = config['balance']
@@ -84,14 +74,61 @@ def createToken():
 
     # Save the token ID
     if os.popen("solana balance " + account).read().split() != "0 SOL".split():
-        dir = "Wallets/Wallet" + str(selWallet) + "/Tokens"
-        tokens = os.listdir(dir)
-        tokenNum = 1
-        if tokens: 
-            tokenNum = max(sorted([int(token[5:][:-5]) for token in tokens]))+1
-        
-        with open(dir + "/token" + str(tokenNum) + ".json", 'w') as json_file:
-            json.dump({"tokenID": tokenID, "account": account}, json_file, indent=4)
+        tokenName = input("Name of the token: ")
+
+        if "tokens.json" not in os. getcwd():
+            with open('tokens.json', 'w') as json_file:
+                json.dump({}, json_file, indent=4)
+
+        tokens = json.load(open('tokens.json'))
+        tokens[tokenName] = tokenID
+
+        with open("tokens.json", 'w') as json_file:
+            json.dump(tokens, json_file, indent=4)
+    else:
+        print("\nUnable to create the token, insufficient balance")
+
+
+
+########## CREATE AN ACCOUNT ##########
+def createAccount():    
+    tokens = json.load(open('tokens.json'))
+    tokenName = input("Token name: ")
+    tokenID = tokens[tokenName]
+    os.system("spl-token create-account " + tokenID)
+
+
+
+########## MINT TOKENS ##########
+def mintTokens():
+    tokens = json.load(open('tokens.json'))
+    tokenName = input("Token name: ")
+    tokenID = tokens[tokenName]
+    qty = input("Quantity of tokens to be minted: ")
+    os.system("spl-token mint " + tokenID + " " + qty)
+
+
+
+########## DISABLE MINT ##########
+def disableMint():
+    tokens = json.load(open('tokens.json'))
+    tokenName = input("Token name: ")
+    tokenID = tokens[tokenName]
+    os.system("spl-token authorize " + tokenID + " mint --disable")
+
+
+
+########## TRANSFER TOKEN ##########
+def tokenTransfer():
+    tokens = json.load(open('tokens.json'))
+    tokenName = input("Token name: ")
+    tokenID = tokens[tokenName]
+    qty = input("Quantity: ")
+    receiver = input("Public key of the receiver: ")
+    os.system("spl-token authorize " + tokenID + " mint --disable")
+
+    os.system("spl-token transfer --fund-recipient " + tokenID + " " + qty + " " + receiver + " --allow-unfunded-recipient")
+
 
 
 ########## GET YOUR ACCOUNT BALANCE ##########
@@ -131,6 +168,10 @@ def menu():
     print("3. Get account balance")
     print("4. Airdrop solana (only for devnet)")
     print("5. Create a token")
+    print("6. Create a token account")
+    print("7. Mint tokens")
+    print("8. Disable minting of token")
+    print("9. Transfer tokens")
 
     while True:
         op = input("\nOption: ")
@@ -139,6 +180,10 @@ def menu():
         elif op == "3": getBalance()
         elif op == "4": airdrop()
         elif op == "5": createToken()
+        elif op == "6": createAccount()
+        elif op == "7": mintTokens()
+        elif op == "8": disableMint()
+        elif op == "9": tokenTransfer()
 
 
 
