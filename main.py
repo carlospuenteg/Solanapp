@@ -9,18 +9,29 @@ if os.system("solana --version") != 0:
 
 ########## CREATE A WALLET ##########
 def createWallet():
-    wallets = os.listdir('Wallets')
+    config = json.load(open('config.json'))
+    wallName = input("Main wallet's name: ")
 
-    dir = input("Wallet name: ")
-    os.mkdir(dir)
-    output = os.popen("solana-keygen new --no-passphrase -o " + dir + "/key.json").read().split("\n")
+    print(os.getcwd())
+    if "Wallets" not in os.listdir(os.getcwd()):
+        os.mkdir("Wallets")
+        config['wallet'] = wallName 
+        with open("config.json", 'w') as json_file:
+            json.dump(config, json_file, indent=4)
+    elif input("Do you want to select this wallet as your main wallet? (Y/n): ").lower == "y":
+        config['wallet'] = wallName 
+        with open("config.json", 'w') as json_file:
+            json.dump(config, json_file, indent=4)
+
+    os.mkdir("Wallets/" + wallName)
+    output = os.popen("solana-keygen new --no-passphrase -o Wallets/" + wallName + "/key.json").read().split("\n")
     pubKey = output[3].split(" ")[1]
     seedPhrase = output[6]
     seed = { 
         "pubKey": pubKey, 
         "seedPhrase": seedPhrase 
     }
-    with open(dir+"/seed.json", 'w') as json_file:
+    with open("Wallets/" + wallName + "/seed.json", 'w') as json_file:
         json.dump(seed, json_file, indent=4)
 
     print("\nWallet successfully created!")
@@ -28,8 +39,7 @@ def createWallet():
 
 
 ########## CREATE WALLET IF NEEDED ##########
-if "Wallets" not in os.getcwd(): 
-    os.mkdir("Wallets")
+if "Wallets" not in os.listdir(os.getcwd()): 
     createWallet()
 
 
@@ -40,10 +50,10 @@ selWallet = config['wallet']
 selCluster = config['cluster']
 selBalance = config['balance']
 
-seed = json.load(open("Wallets/Wallet" + str(selWallet) + "/seed.json"))
+seed = json.load(open("Wallets/" + selWallet + "/seed.json"))
 selPubKey = seed['pubKey']
 os.system("solana config set --url https://api." + selCluster + ".solana.com")
-os.system("solana config set --keypair " + "Wallets/Wallet" + str(selWallet) + "/key.json")
+os.system("solana config set --keypair " + "Wallets/" + selWallet + "/key.json")
     
 
 
@@ -76,7 +86,7 @@ def createToken():
     if os.popen("solana balance " + account).read().split() != "0 SOL".split():
         tokenName = input("Name of the token: ")
 
-        if "tokens.json" not in os. getcwd():
+        if "tokens.json" not in os.listdir(os.getcwd()):
             with open('tokens.json', 'w') as json_file:
                 json.dump({}, json_file, indent=4)
 
