@@ -139,8 +139,6 @@ def tokenTransfer():
     tokenID = tokens[tokenName]
     qty = input("Quantity: ")
     receiver = input("Public key of the receiver: ")
-    os.system("spl-token authorize " + tokenID + " mint --disable")
-
     os.system("spl-token transfer --fund-recipient " + tokenID + " " + qty + " " + receiver + " --allow-unfunded-recipient")
 
 
